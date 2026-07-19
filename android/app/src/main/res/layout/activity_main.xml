@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Kitten Guardian CCTV"
+        android:textColor="#4CAF50"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="20dp" />
+
+    <TextView
+        android:id="@+id/text_pairing_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Status Pairing: Belum dipasangkan"
+        android:textColor="#FF9800"
+        android:textSize="13sp"
+        android:layout_marginBottom="4dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Aktifkan Mode Pairing di aplikasi desktop, lalu tekan Start Streaming di sini. ID dan password akan diterima otomatis, tidak perlu diketik manual."
+        android:textColor="#666666"
+        android:textSize="11sp"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mode Koneksi"
+        android:textColor="#AAAAAA"
+        android:textSize="13sp"
+        android:layout_marginBottom="4dp" />
+
+    <RadioGroup
+        android:id="@+id/radio_connection_mode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
+
+        <RadioButton
+            android:id="@+id/radio_mode_wifi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="WiFi Lokal"
+            android:textColor="#E0E0E0"
+            android:checked="true"
+            android:layout_marginEnd="24dp" />
+
+        <RadioButton
+            android:id="@+id/radio_mode_internet"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Internet (WAN)"
+            android:textColor="#E0E0E0" />
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="-- WiFi Lokal --"
+        android:textColor="#4CAF50"
+        android:textSize="12sp"
+        android:layout_marginBottom="4dp" />
+
+    <EditText
+        android:id="@+id/edit_wifi_ip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:hint="IP Laptop, misal 192.168.1.10"
+        android:textColor="#E0E0E0"
+        android:textColorHint="#666666"
+        android:backgroundTint="#4CAF50"
+        android:layout_marginBottom="6dp" />
+
+    <EditText
+        android:id="@+id/edit_wifi_port"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:text="8765"
+        android:textColor="#E0E0E0"
+        android:backgroundTint="#4CAF50"
+        android:layout_marginBottom="14dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="-- Internet (WAN, mis. lewat port forwarding/DDNS) --"
+        android:textColor="#4CAF50"
+        android:textSize="12sp"
+        android:layout_marginBottom="4dp" />
+
+    <EditText
+        android:id="@+id/edit_internet_host"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:hint="IP publik / domain DDNS"
+        android:textColor="#E0E0E0"
+        android:textColorHint="#666666"
+        android:backgroundTint="#4CAF50"
+        android:layout_marginBottom="6dp" />
+
+    <EditText
+        android:id="@+id/edit_internet_port"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:hint="Port WAN (sesuai port forwarding)"
+        android:textColor="#E0E0E0"
+        android:textColorHint="#666666"
+        android:backgroundTint="#4CAF50"
+        android:layout_marginBottom="20dp" />
+
+    <Button
+        android:id="@+id/btn_toggle_stream"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Start Streaming"
+        android:backgroundTint="#4CAF50"
+        android:textColor="#0D0D0D"
+        android:layout_marginBottom="20dp" />
+
+    <TextView
+        android:id="@+id/text_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Status: Idle"
+        android:textColor="#E0E0E0"
+        android:textSize="14sp"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/text_telemetry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="#8FE388"
+        android:fontFamily="monospace"
+        android:textSize="12sp"
+        android:lineSpacingExtra="4dp" />
+
+</LinearLayout>
+</ScrollView>

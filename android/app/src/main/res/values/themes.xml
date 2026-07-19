@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.KittenGuardian" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#4CAF50</item>
+        <item name="colorPrimaryDark">#0D0D0D</item>
+        <item name="colorAccent">#4CAF50</item>
+        <item name="android:windowBackground">#121212</item>
+        <item name="android:statusBarColor">#0D0D0D</item>
+    </style>
+</resources>
