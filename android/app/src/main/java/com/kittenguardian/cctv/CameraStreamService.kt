@@ -66,7 +66,9 @@ class CameraStreamService : LifecycleService() {
     private var networkClient: NetworkClient? = null
     private lateinit var telemetryManager: TelemetryManager
     private lateinit var credentialsStore: CredentialsStore
-    private val repellentPlayer = RepellentSoundPlayer()
+    private val repellentPlayer by lazy {
+        RepellentSoundPlayer(onError = { e -> AppLogger.log(this, TAG, "Alarm usir hewan gagal diputar", e) })
+    }
 
     private var wakeLock: PowerManager.WakeLock? = null
     private var wifiLock: WifiManager.WifiLock? = null
@@ -87,6 +89,7 @@ class CameraStreamService : LifecycleService() {
         createNotificationChannel()
         acquireWakeLock()
         acquireWifiLock()
+        AppLogger.log(this, TAG, "Service dibuat")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -129,13 +132,25 @@ class CameraStreamService : LifecycleService() {
     }
 
     private fun handleCommand(cmd: String, json: JSONObject) {
+        AppLogger.log(this, TAG, "Command diterima: $cmd")
         when (cmd) {
-            "flash_on" -> camera?.cameraControl?.enableTorch(true)
-            "flash_off" -> camera?.cameraControl?.enableTorch(false)
+            "flash_on" -> {
+                val ok = camera?.cameraControl?.enableTorch(true) != null
+                AppLogger.log(this, TAG, "flash_on -> camera bound: ${camera != null}")
+            }
+            "flash_off" -> {
+                camera?.cameraControl?.enableTorch(false)
+                AppLogger.log(this, TAG, "flash_off -> camera bound: ${camera != null}")
+            }
             "flash_blink" -> blinkFlash()
             "pest_alarm" -> {
                 val duration = json.optInt("duration_s", 5)
-                repellentPlayer.play(duration)
+                try {
+                    repellentPlayer.play(duration)
+                    AppLogger.log(this, TAG, "pest_alarm dimulai, durasi ${duration}s")
+                } catch (e: Throwable) {
+                    AppLogger.log(this, TAG, "pest_alarm GAGAL", e)
+                }
             }
             "update_credentials", "set_credentials" -> {
                 val newCameraId = json.optString("camera_id")
@@ -146,7 +161,7 @@ class CameraStreamService : LifecycleService() {
                 if (newPassword.isNotEmpty()) {
                     credentialsStore.password = newPassword
                 }
-                Log.i(TAG, "Kredensial diperbarui dari server (pairing/rotasi)")
+                AppLogger.log(this, TAG, "Kredensial diperbarui dari server (pairing/rotasi)")
                 PairingEvents.notifyCredentialsUpdated()
             }
         }
@@ -170,6 +185,7 @@ class CameraStreamService : LifecycleService() {
     }
 
     private fun bindCameraUseCases() {
+        AppLogger.log(this, TAG, "Mulai bind kamera...")
         val providerFuture = ProcessCameraProvider.getInstance(this)
         providerFuture.addListener({
             try {
@@ -190,9 +206,11 @@ class CameraStreamService : LifecycleService() {
                     CameraSelector.DEFAULT_BACK_CAMERA,
                     analysis,
                 )
-            } catch (e: Exception) {
-                Log.e(TAG, "Gagal menyiapkan kamera: ${e.message}", e)
-                updateNotification("Gagal mengakses kamera, coba buka ulang aplikasi")
+                AppLogger.log(this, TAG, "Kamera berhasil di-bind")
+            } catch (e: Throwable) {
+                val reason = "${e.javaClass.simpleName}: ${e.message}"
+                AppLogger.log(this, TAG, "Gagal bind kamera", e)
+                updateNotification("Gagal akses kamera: $reason")
             }
         }, cameraExecutor)
     }

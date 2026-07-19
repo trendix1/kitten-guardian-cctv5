@@ -9,7 +9,7 @@ from PyQt5.QtGui import QImage, QPixmap, QKeyEvent
 from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QGroupBox, QTextEdit, QComboBox, QSpinBox, QLineEdit, QFormLayout,
-    QSizePolicy,
+    QSizePolicy, QSplitter, QTabWidget, QFrame,
 )
 
 from core.server import CameraServer
@@ -77,24 +77,53 @@ class MainWindow(QMainWindow):
     def _build_ui(self):
         central = QWidget()
         self.setCentralWidget(central)
-        root = QHBoxLayout(central)
+        root = QVBoxLayout(central)
+        root.setContentsMargins(14, 14, 14, 14)
+        root.setSpacing(10)
 
-        left_col = QVBoxLayout()
+        splitter = QSplitter(Qt.Horizontal)
+        splitter.setChildrenCollapsible(False)
+        root.addWidget(splitter, stretch=1)
+
+        # ================= Panel kiri: video =================
+        left_panel = QWidget()
+        left_col = QVBoxLayout(left_panel)
+        left_col.setContentsMargins(0, 0, 0, 0)
+        left_col.setSpacing(8)
 
         self.warning_label = QLabel("")
         self.warning_label.setObjectName("WarningLabel")
         self.warning_label.setAlignment(Qt.AlignCenter)
-        self.warning_label.setFixedHeight(30)
+        self.warning_label.setFixedHeight(28)
         left_col.addWidget(self.warning_label)
 
         self.video_label = QLabel("Menunggu kamera terhubung...")
         self.video_label.setObjectName("VideoLabel")
         self.video_label.setAlignment(Qt.AlignCenter)
-        self.video_label.setMinimumSize(720, 480)
+        self.video_label.setMinimumSize(560, 400)
         self.video_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         left_col.addWidget(self.video_label, stretch=1)
 
-        controls = QHBoxLayout()
+        splitter.addWidget(left_panel)
+
+        # ================= Panel kanan: tab-tab terpisah =================
+        right_panel = QTabWidget()
+        right_panel.setMinimumWidth(340)
+        splitter.addWidget(right_panel)
+        splitter.setStretchFactor(0, 3)
+        splitter.setStretchFactor(1, 2)
+
+        right_panel.addTab(self._build_tab_status(), "Status")
+        right_panel.addTab(self._build_tab_security(), "Keamanan")
+        right_panel.addTab(self._build_tab_log(), "Log")
+
+        # ================= Bar kontrol bawah =================
+        control_frame = QFrame()
+        control_frame.setObjectName("ControlBar")
+        controls = QHBoxLayout(control_frame)
+        controls.setContentsMargins(12, 10, 12, 10)
+        controls.setSpacing(8)
+
         self.btn_start = QPushButton("Start")
         self.btn_start.setObjectName("PrimaryButton")
         self.btn_stop = QPushButton("Stop")
@@ -113,17 +142,23 @@ class MainWindow(QMainWindow):
 
         controls.addWidget(self.btn_start)
         controls.addWidget(self.btn_stop)
+        controls.addSpacing(12)
         controls.addWidget(self.btn_flash)
         controls.addWidget(self.btn_flash_blink)
+        controls.addSpacing(12)
         controls.addWidget(self.btn_alarm_test)
         controls.addWidget(self.btn_pest_alarm)
+        controls.addStretch(1)
         controls.addWidget(self.mode_combo)
         controls.addWidget(self.btn_fullscreen)
-        left_col.addLayout(controls)
 
-        root.addLayout(left_col, stretch=3)
+        root.addWidget(control_frame)
 
-        right_col = QVBoxLayout()
+    def _build_tab_status(self) -> QWidget:
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(14)
 
         conn_group = QGroupBox("Koneksi")
         conn_form = QFormLayout(conn_group)
@@ -131,9 +166,9 @@ class MainWindow(QMainWindow):
         self.port_spin.setRange(1024, 65535)
         self.port_spin.setValue(DEFAULT_PORT)
         conn_form.addRow("Port Server:", self.port_spin)
-        right_col.addWidget(conn_group)
+        layout.addWidget(conn_group)
 
-        status_group = QGroupBox("Status")
+        status_group = QGroupBox("Status Koneksi")
         status_layout = QVBoxLayout(status_group)
         self.row_connection = StatusRow("Connection")
         self.row_auth = StatusRow("Autentikasi")
@@ -142,10 +177,35 @@ class MainWindow(QMainWindow):
         self.row_motion = StatusRow("Motion Status")
         for row in (self.row_connection, self.row_auth, self.row_fps, self.row_ping, self.row_motion):
             status_layout.addWidget(row)
-        right_col.addWidget(status_group)
+        layout.addWidget(status_group)
 
-        auth_group = QGroupBox("Keamanan Kamera (ID & Password)")
+        mon_group = QGroupBox("Monitoring Kamera (Android)")
+        mon_layout = QVBoxLayout(mon_group)
+        self.row_battery = StatusRow("Battery")
+        self.row_charging = StatusRow("Charging")
+        self.row_temperature = StatusRow("Temperature")
+        self.row_voltage = StatusRow("Voltage")
+        self.row_ip = StatusRow("IP Address")
+        self.row_wifi = StatusRow("WiFi Status")
+        for row in (
+            self.row_battery, self.row_charging, self.row_temperature,
+            self.row_voltage, self.row_ip, self.row_wifi,
+        ):
+            mon_layout.addWidget(row)
+        layout.addWidget(mon_group)
+
+        layout.addStretch(1)
+        return tab
+
+    def _build_tab_security(self) -> QWidget:
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(14)
+
+        auth_group = QGroupBox("ID & Password Kamera")
         auth_form = QFormLayout(auth_group)
+        auth_form.setVerticalSpacing(10)
 
         self.edit_camera_id = QLineEdit(self.auth.config.camera_id)
         auth_form.addRow("Camera ID:", self.edit_camera_id)
@@ -173,44 +233,38 @@ class MainWindow(QMainWindow):
         self.label_rotation_info.setWordWrap(True)
         auth_form.addRow(self.label_rotation_info)
 
+        layout.addWidget(auth_group)
+
+        pairing_group = QGroupBox("Pairing Kamera Baru")
+        pairing_layout = QVBoxLayout(pairing_group)
+        pairing_layout.setSpacing(10)
+
         self.btn_pairing_mode = QPushButton("Mode Pairing: OFF")
         self.btn_pairing_mode.setCheckable(True)
         self.btn_pairing_mode.setObjectName("PrimaryButton")
-        auth_form.addRow(self.btn_pairing_mode)
+        pairing_layout.addWidget(self.btn_pairing_mode)
 
         self.label_pairing_info = QLabel(
             "Aktifkan Mode Pairing, lalu tekan Start Streaming di HP (tanpa perlu isi ID/password). "
             "HP otomatis menerima kredensial yang benar dan tersimpan untuk seterusnya."
         )
         self.label_pairing_info.setWordWrap(True)
-        auth_form.addRow(self.label_pairing_info)
+        pairing_layout.addWidget(self.label_pairing_info)
 
-        right_col.addWidget(auth_group)
+        layout.addWidget(pairing_group)
+        layout.addStretch(1)
+        return tab
 
-        mon_group = QGroupBox("Monitoring Kamera (Android)")
-        mon_layout = QVBoxLayout(mon_group)
-        self.row_battery = StatusRow("Battery")
-        self.row_charging = StatusRow("Charging")
-        self.row_temperature = StatusRow("Temperature")
-        self.row_voltage = StatusRow("Voltage")
-        self.row_ip = StatusRow("IP Address")
-        self.row_wifi = StatusRow("WiFi Status")
-        for row in (
-            self.row_battery, self.row_charging, self.row_temperature,
-            self.row_voltage, self.row_ip, self.row_wifi,
-        ):
-            mon_layout.addWidget(row)
-        right_col.addWidget(mon_group)
+    def _build_tab_log(self) -> QWidget:
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+        layout.setContentsMargins(12, 12, 12, 12)
 
-        log_group = QGroupBox("Log")
-        log_layout = QVBoxLayout(log_group)
         self.log_view = QTextEdit()
         self.log_view.setObjectName("LogView")
         self.log_view.setReadOnly(True)
-        log_layout.addWidget(self.log_view)
-        right_col.addWidget(log_group, stretch=1)
-
-        root.addLayout(right_col, stretch=2)
+        layout.addWidget(self.log_view)
+        return tab
 
     def _connect_signals(self):
         self.btn_start.clicked.connect(self._on_start)

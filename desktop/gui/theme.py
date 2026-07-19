@@ -92,4 +92,40 @@ QScrollBar::handle:vertical {
     background: #333333;
     border-radius: 5px;
 }
+QTabWidget::pane {
+    border: 1px solid #2A2A2A;
+    border-radius: 8px;
+    background-color: #161616;
+    top: -1px;
+}
+QTabBar::tab {
+    background-color: #1A1A1A;
+    color: #AAAAAA;
+    border: 1px solid #2A2A2A;
+    border-bottom: none;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    padding: 8px 16px;
+    margin-right: 2px;
+}
+QTabBar::tab:selected {
+    background-color: #161616;
+    color: #4CAF50;
+    font-weight: bold;
+}
+QTabBar::tab:hover {
+    color: #E0E0E0;
+}
+QSplitter::handle {
+    background-color: #2A2A2A;
+    width: 3px;
+}
+QSplitter::handle:hover {
+    background-color: #4CAF50;
+}
+QFrame#ControlBar {
+    background-color: #161616;
+    border: 1px solid #2A2A2A;
+    border-radius: 8px;
+}
 """

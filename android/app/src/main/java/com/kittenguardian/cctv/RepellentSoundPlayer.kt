@@ -19,7 +19,7 @@ import kotlin.math.PI
  * bervariasi tergantung hardware speaker & jenis hewan. Fitur ini tetap
  * berguna sebagai bunyi mendadak bernada tinggi yang mengejutkan hewan kecil.
  */
-class RepellentSoundPlayer {
+class RepellentSoundPlayer(private val onError: ((Throwable) -> Unit)? = null) {
 
     companion object {
         private const val TAG = "RepellentSoundPlayer"
@@ -85,6 +85,7 @@ class RepellentSoundPlayer {
                 audioTrack.release()
             } catch (e: Exception) {
                 Log.e(TAG, "Gagal memutar alarm usir hewan: ${e.message}")
+                onError?.invoke(e)
             } finally {
                 isPlaying = false
             }
