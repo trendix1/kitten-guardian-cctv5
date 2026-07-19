@@ -18,6 +18,7 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
 import kotlinx.coroutines.*
 import org.json.JSONObject
@@ -187,6 +188,8 @@ class CameraStreamService : LifecycleService() {
     private fun bindCameraUseCases() {
         AppLogger.log(this, TAG, "Mulai bind kamera...")
         val providerFuture = ProcessCameraProvider.getInstance(this)
+        // PENTING: bindToLifecycle() wajib dipanggil dari main thread,
+        // makanya listener ini pakai main executor, BUKAN cameraExecutor.
         providerFuture.addListener({
             try {
                 val cameraProvider = providerFuture.get()
@@ -197,6 +200,8 @@ class CameraStreamService : LifecycleService() {
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                     .build()
 
+                // Analisis frame tetap jalan di background executor terpisah supaya
+                // main thread tidak terbebani proses encode JPEG.
                 analysis.setAnalyzer(cameraExecutor) { imageProxy ->
                     processFrame(imageProxy)
                 }
@@ -212,7 +217,7 @@ class CameraStreamService : LifecycleService() {
                 AppLogger.log(this, TAG, "Gagal bind kamera", e)
                 updateNotification("Gagal akses kamera: $reason")
             }
-        }, cameraExecutor)
+        }, ContextCompat.getMainExecutor(this))
     }
 
     private fun processFrame(imageProxy: ImageProxy) {
